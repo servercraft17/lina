@@ -6,11 +6,61 @@
 #include <stdint.h>
 
 /*
- *
- * I absolutely fucking despise templates, but they also make things like
- * this SO much easier, instead of spending hours writing the struct(s) 
- * you get to spend hours debuging.
- * 
+
+###################
+      Vectors
+###################
+
+
+###################
+     Matrices
+###################
+A Mathematical matrix is essentially a grid of numbers and
+elements are accessed by their rows and columns, for example
+the first element would be at row 0, column 0.
+
+There are 3 matrix structs included in this library, which are the following:
+    mat4: a matrix that has 4 rows and 4 columns, all you will need for 3D camera math.
+    mat3: a matrix that has 3 rows and 3 columns, you can use this for some 3D camera math 
+            but most of it requires 4 dimensional matrices.
+    mat2: a matrix that has 2 rows and 2 columns, usually only used for 2D Z axis rotations.
+
+All the matrix structs have a member for each possible position
+on the grid, which are all prefixed with an '_' and have two digits
+following it, the first digit indicates the row and the second digit
+indicates the column. For example, to access row 0, column 0 you'd use
+the member '_00'.
+
+There are also members prefix with '_m' that are just aliases for the
+members that start at row/column 1 instead of 0. Both access the same
+memory, they are here, because starting at 1 just makes more sense to
+some people and a lot of mathematical papers on matrices start at row
+/column 1 and it can be quite confusing at times to switch between the
+two constantly.
+
+================
+  Constructors
+================
+The Default constructor for every matrix struct creates an Identity Matrix (see 'Identity Matrices')
+The Non-Default constructor just lets you set every value yourself.
+You can get a matrix with every position equal to zero with the 'zeroed' function.
+
+! TODO: Finish writing this shit, and make sure to give a definition /  description of what the fuck an Identity matrix is. 
+
+===============
+  Operations
+===============
+There are operator overloads for addition, subtraction, and multiplication
+for all the matrix structs. Matrix division isn't possible, hence why there
+is no division operator overload.
+
+>>> Addition/Subtraction <<<
+Matrix addition/subtraction is pretty simple, you just add/subtract every value in 
+matrix A with the corrosponding value in matrix B and put it in the corrosponding
+position in matrix C. 
+
+
+
 */
 
 #define PRINT_VEC2(__vec, __type) printf("<"#__type", "#__type">\n", __vec.x, __vec.y);
@@ -461,6 +511,7 @@ namespace Lina {
                 _31=_32=0;
         }
 
+        // returns an identity matrix
         inline static mat4 identity() {
             // This function is pointless, but some people might like the explicity of using "mat4::identity()"
             // instead of "mat4()" and some people might not realize that the constructor creates an Identity matrix.
@@ -468,6 +519,7 @@ namespace Lina {
             return mat4();
         }
 
+        // returns a matrix with every value initialized to 0.
         inline static mat4 zeroed() {
             return mat4(
                 0.f, 0.f, 0.f, 0.f,
@@ -477,7 +529,9 @@ namespace Lina {
             );
         }
 
-            // Operations
+        // Operations
+        
+        // returns a translation matrix 
         inline static mat4 translation(vec3 T) noexcept {
             return mat4(
                 1.f, 0.f, 0.f, T.x,
@@ -487,10 +541,12 @@ namespace Lina {
             );
         }
 
+        // translates this matrix by T.
         inline void translate(vec3 T) noexcept {
             *this *= translation(T);
         }
 
+        // returns a scale matrix.
         inline static mat4 scalation(vec4 S) noexcept {
             return mat4(
                 S.x, 0.f, 0.f, 0.f,
@@ -499,10 +555,13 @@ namespace Lina {
                 0.f, 0.f, 0.f, S.w
             );
         }
+
+        // scales this matrix by S.
         inline void scale(vec4 S) noexcept {
             *this *= scalation(S);
         }
 
+        // returns a rotation matrix for the X axis that is rotated by `degrees`.
         inline static mat4 rotationX(float degrees) noexcept {
             return mat4(
                 1.f, 0.f, 0.f, 0.f, 
@@ -512,6 +571,7 @@ namespace Lina {
             );
         }
 
+        // rotates this matrix on the X axis by `degrees`.
         inline void rotateX(float degrees) noexcept {
             *this *= rotationX(degrees);
         }
