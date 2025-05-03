@@ -68,7 +68,7 @@ position in matrix C.
 #define PRINT_VEC4(__vec, __type) printf("<"#__type", "#__type, #__type, #__type">\n", __vec.x, __vec.y, vec.z, vec.w);
 
 
-namespace Lina {
+namespace lina {
     constexpr double PI = M_PI;
     constexpr double PI_2 = M_PI/2;
     constexpr double TAU = M_PI*2;
