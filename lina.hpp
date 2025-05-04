@@ -74,7 +74,7 @@ namespace lina {
     constexpr double TAU = M_PI*2;
 
     inline float cot(float x) {
-        return 1.0f/tanf(x);
+        return 1.f/tanf(x);
     }
 
     inline float dtor(float deg) {
@@ -306,7 +306,7 @@ namespace lina {
         operator Vector3<_T>() const {
             return Vector3<_T>((_T)x, (_T)y, (_T)z);
         }
- 
+
     #ifdef SDL_h_
         operator SDL_Point() const {
             return SDL_Point {.x=(int)x, .y=(int)y};
@@ -323,6 +323,9 @@ namespace lina {
         T x, y, z, w;
         Vector4(T x, T y, T z, T w = (T)1) {
             this->x=x; this->y=y; this->z=z; this->w=w;
+        }
+        Vector4(Vector3<T> v, T w = (T)1) {
+            x=v.x; y=v.y; z=v.z; this->w=w;
         }
         Vector4() {x=y=z=(T)0;w=(T)1;}
  
@@ -1015,6 +1018,55 @@ namespace lina {
         }
 
     };
+
+    inline mat4 CreateRMCameraViewMatrix(vec3 position, vec3 right, vec3 up, vec3 forward) noexcept {
+        return lina::mat4({
+            right.x,    right.y,    right.z,    -right.dot(position),
+            up.x,       up.y,       up.z,       -up.dot(position),
+            -forward.x, -forward.y, -forward.z, forward.dot(position),
+            0,          0,          0,          1
+        });
+    }
+
+    inline mat4 CreateCMCameraViewMatrix(vec3 position, vec3 right, vec3 up, vec3 forward) noexcept {
+        return lina::mat4({
+            right.x, up.x, -forward.x, 0,
+            right.y, up.y, -forward.y, 0,
+            right.z, up.z, -forward.z, 0,
+            -right.dot(position), -up.dot(position), forward.dot(position), 1
+        });
+    }
+
+    inline mat4 CreateRMPerspectiveMatrix(ivec2 screen_size, float fov, float CloseRenderDistance, float RenderDistance, lina::vec3 cam_offset = {0, 0, 1}) noexcept {
+        float cotan_rads_2 = cot(0.5 * dtor(fov));
+        
+        return lina::mat4 ({
+            cotan_rads_2 * screen_size.y/screen_size.x, 0, 0, cam_offset.x,
+            0, cotan_rads_2, 0, cam_offset.y,
+            0, 0, RenderDistance / (CloseRenderDistance - RenderDistance), -cam_offset.z,
+            0, 0, -(RenderDistance * CloseRenderDistance) / (RenderDistance - CloseRenderDistance), 0
+        });
+    }
+
+    inline mat4 CreateCMPerspectiveMatrix(ivec2 screen_size, float fov, float CloseRenderDistance, float RenderDistance, lina::vec3 cam_offset = {0, 0, 1}) noexcept{
+        float cotan_rads_2 = cot(0.5 * dtor(fov));
+        
+        return lina::mat4 ({
+            cotan_rads_2 * screen_size.y/screen_size.x, 0, 0, 0,
+            0, cotan_rads_2, 0, 0,
+            0, 0, RenderDistance / (CloseRenderDistance - RenderDistance), -(RenderDistance * CloseRenderDistance) / (RenderDistance - CloseRenderDistance),
+            cam_offset.x, cam_offset.y, -cam_offset.z, 0
+        });
+    }
+
+    inline mat4 CreateRMModelMatrix(vec3 position, vec3 rotation, vec4 scale = {1,1,1,1}) noexcept {
+        return mat4::translation(position) * mat4::rotationX(rotation.x) * mat4::rotationY(rotation.y) * mat4::rotationZ(rotation.z) * mat4::scalation(scale);
+    }
+    
+    inline mat4 CreateCMModelMatrix(vec3 position, vec3 rotation, vec4 scale = {1,1,1,1}) noexcept {
+        return (mat4::translation(position) * mat4::rotationX(rotation.x) * mat4::rotationY(rotation.y) * mat4::rotationZ(rotation.z) * mat4::scalation(scale)).transposed();
+    }
+
 }
  
 #endif/* LINA_HPP */ 
