@@ -1037,7 +1037,7 @@ namespace lina {
         });
     }
 
-    inline mat4 CreateRMPerspectiveMatrix(ivec2 screen_size, float fov, float CloseRenderDistance, float RenderDistance, lina::vec3 cam_offset = {0, 0, 1}) noexcept {
+    inline mat4 CreateRMCameraPerspectiveMatrix(ivec2 screen_size, float fov, float CloseRenderDistance, float RenderDistance, lina::vec3 cam_offset = {0, 0, 1}) noexcept {
         float cotan_rads_2 = cot(0.5 * dtor(fov));
         
         return lina::mat4 ({
@@ -1048,7 +1048,7 @@ namespace lina {
         });
     }
 
-    inline mat4 CreateCMPerspectiveMatrix(ivec2 screen_size, float fov, float CloseRenderDistance, float RenderDistance, lina::vec3 cam_offset = {0, 0, 1}) noexcept{
+    inline mat4 CreateCMCameraPerspectiveMatrix(ivec2 screen_size, float fov, float CloseRenderDistance, float RenderDistance, lina::vec3 cam_offset = {0, 0, 1}) noexcept{
         float cotan_rads_2 = cot(0.5 * dtor(fov));
         
         return lina::mat4 ({
@@ -1065,6 +1065,22 @@ namespace lina {
     
     inline mat4 CreateCMModelMatrix(vec3 position, vec3 rotation, vec4 scale = {1,1,1,1}) noexcept {
         return (mat4::translation(position) * mat4::rotationX(rotation.x) * mat4::rotationY(rotation.y) * mat4::rotationZ(rotation.z) * mat4::scalation(scale)).transposed();
+    }
+
+    inline vec3 CalculateCameraForwardVector(float pitch, float yaw) {
+        return vec3(
+            cosf(pitch) * cosf(yaw),
+            sinf(pitch),
+            cosf(pitch) * sinf(yaw)
+        ).normalized();
+    }
+
+    inline vec3 CalculateCameraRightVector(vec3 vecForward, vec3 vecGlobalUp = /* Y axis */{0, 1, 0}) {
+        return vec3::cross(vecForward, vecGlobalUp).normalized();
+    }
+
+    inline vec3 CalculateCameraUpVector(vec3 vecForward, vec3 vecRight) {
+        return vec3::cross(vecRight, vecForward).normalized();
     }
 
 }
